@@ -179,10 +179,69 @@ server.get('/api/v1/eventos-confesiones/:id/ingresos', (req, res) => {
   res.json(ingresos);
 });
 
-// Montar el router en el prefijo api/v1
+// DELETE evento específico
+server.delete('/api/v1/eventos-confesiones/:id', (req, res) => {
+  try {
+    const eventoId = parseInt(req.params.id);
+    
+    // Verificar si existe el evento
+    const evento = router.db
+      .get('eventos-confesiones')
+      .find({ id: eventoId })
+      .value();
+
+    if (!evento) {
+      return res.status(404).json({
+        code: "404",
+        message: "Evento no encontrado."
+      });
+    }
+
+    // Primero eliminar los gastos asociados
+    router.db
+      .get('gastos')
+      .remove({ eventoId })
+      .write();
+
+    // Luego eliminar los ingresos asociados
+    router.db
+      .get('ingresos')
+      .remove({ eventoId })
+      .write();
+
+    // Finalmente eliminar el evento
+    router.db
+      .get('eventos-confesiones')
+      .remove({ id: eventoId })
+      .write();
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({
+      code: "500",
+      message: "Error al eliminar el evento."
+    });
+  }
+});
+
+// Mantener las rutas existentes de totales y consultas
+server.get('/api/v1/eventos-confesiones/:id/ingresos-totales', (req, res) => {
+  const eventoId = parseInt(req.params.id);
+  const ingresosEvento = router.db
+    .get('ingresos')
+    .filter({ eventoId })
+    .value();
+
+  const total = ingresosEvento.reduce((sum, ingreso) => sum + ingreso.precio, 0);
+  
+  res.json({ total });
+});
+
+
 server.use('/api/v1', router);
 
 const PORT = 8080;
 server.listen(PORT, () => {
   console.log(`JSON Server está corriendo en http://localhost:${PORT}/api/v1`);
 });
+
