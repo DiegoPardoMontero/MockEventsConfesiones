@@ -1,0 +1,25 @@
+{
+  "name": "mock-confessions-events-api",
+  "version": "1.0.0",
+  "description": "Mock API para eventos de confesiones usando json-server",
+  "main": "server.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "mock",
+    "api",
+    "json-server",
+    "events",
+    "confessions"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "json-server": "^0.17.4",
+    "lowdb": "^1.0.0"
+  }
+}
