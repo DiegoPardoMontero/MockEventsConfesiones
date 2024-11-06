@@ -237,6 +237,56 @@ server.get('/api/v1/eventos-confesiones/:id/ingresos-totales', (req, res) => {
   res.json({ total });
 });
 
+// Agregar esta ruta junto con las otras rutas personalizadas
+
+// PUT actualizar evento confesión
+server.put('/api/v1/eventos-confesiones/:id', (req, res) => {
+  try {
+    const eventoId = parseInt(req.params.id);
+    
+    // Verificar si existe el evento
+    const evento = router.db
+      .get('eventos-confesiones')
+      .find({ id: eventoId })
+      .value();
+
+    if (!evento) {
+      return res.status(404).json({
+        code: "404",
+        message: "Evento no encontrado."
+      });
+    }
+
+    // Validar los campos requeridos
+    if (!req.body.nombre || !req.body.aforo || !req.body.fecha) {
+      return res.status(400).json({
+        code: "400",
+        message: "Los campos nombre, aforo y fecha son requeridos."
+      });
+    }
+
+    // Actualizar el evento
+    const updatedEvento = {
+      ...evento,
+      nombre: req.body.nombre,
+      aforo: req.body.aforo,
+      fecha: req.body.fecha
+    };
+
+    router.db
+      .get('eventos-confesiones')
+      .find({ id: eventoId })
+      .assign(updatedEvento)
+      .write();
+
+    res.json(updatedEvento);
+  } catch (error) {
+    res.status(500).json({
+      code: "500",
+      message: "Error al actualizar el evento."
+    });
+  }
+});
 
 server.use('/api/v1', router);
 
